@@ -1,12 +1,22 @@
 ﻿<Window x:Class="Graph_Coloring.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Graph_Coloring"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Розфарбовування графів" Height="450" Width="600" WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <Canvas x:Name="GraphCanvas" Background="Transparent" Grid.Column="0" MouseLeftButtonDown="GraphCanvas_MouseLeftButtonDown"/>
+
+        <StackPanel Grid.Column="1" Background="#E1E2E1">
+            <TextBlock Text="КЕРУВАННЯ" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,15"/>
+
+            <Button Content="Очистити граф" Margin="10,5" Padding="5" Click="BtnClear_Click"/>
+            <Button Content="Hill Climbing" Margin="10,5" Padding="5" Click="BtnSolve_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Відпал (Simulated Annealing)" Margin="10,5" Padding="5" Click="BtnSolveAnnealing_Click" Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Променевий пошук (Beam Search)" Margin="10,5" Padding="5" Click="BtnSolveBeam_Click" Background="#2196F3" Foreground="White" FontWeight="Bold"/>
+        </StackPanel>
     </Grid>
 </Window>

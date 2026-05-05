@@ -20,17 +20,8 @@ namespace Graph_Coloring.Algorithms
                 return 0;
             }
 
-            if (colorCount <= 1)
-            {
-                foreach (var node in graph.Nodes)
-                {
-                    node.Color = 1;
-                }
-                return 0;
-            }
-
             int iterations = 0;
-            int maxIterations = 500;
+            int maxIterations = 5000;
 
             List<int[]> beam = new List<int[]>();
 

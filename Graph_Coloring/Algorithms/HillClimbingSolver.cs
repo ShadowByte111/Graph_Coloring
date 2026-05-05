@@ -16,16 +16,6 @@ namespace Graph_Coloring.Algorithms
 
         public int Solve(Graph graph, int colorCount)
         {
-            if (colorCount == 1)
-            {
-                foreach (var node in graph.Nodes) 
-                { 
-                    node.Color = 1; 
-                }
-
-                return 0;
-            }
-
             int iterations = 0;
             int maxIterations = 10000;
 

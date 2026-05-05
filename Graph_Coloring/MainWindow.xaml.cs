@@ -246,7 +246,6 @@ namespace Graph_Coloring
                 report.AppendLine("========================================");
                 report.AppendLine($"Дата та час: {DateTime.Now}");
                 report.AppendLine($"Загальна кількість вершин: {_graph.Nodes.Count}");
-                report.AppendLine($"Залишкових конфліктів: {_graph.CalculateConflicts()}");
 
                 report.AppendLine("\n--- Останній запущений алгоритм ---");
                 report.AppendLine(ResultTextBlock.Text);

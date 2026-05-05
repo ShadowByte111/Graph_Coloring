@@ -1,5 +1,7 @@
 ﻿//using Graph_Coloring.Graph_Coloring;
-using System.Text;
+using System.IO;          // Для запису тексту у файл
+using System.Text;        // Для красивого форматування тексту (StringBuilder)
+using Microsoft.Win32;    // Для вікна SaveFileDialog
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -12,6 +14,7 @@ using System.Windows.Shapes;
 using System.Collections.Generic;
 using Graph_Coloring.Models;
 using Graph_Coloring.Algorithms;
+
 
 namespace Graph_Coloring
 {
@@ -239,6 +242,73 @@ namespace Graph_Coloring
             return true;
         }
 
+        // --- КНОПКА: Збереження результатів у файл ---
+        private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
+        {
+            // 1. Перевіряємо, чи є взагалі що зберігати
+            if (_graph.Nodes.Count == 0)
+            {
+                MessageBox.Show("Немає графа для збереження. Спочатку намалюйте його!", "Помилка");
+                return;
+            }
+
+            // 2. Налаштовуємо стандартне вікно збереження Windows
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Текстові файли (*.txt)|*.txt|Всі файли (*.*)|*.*"; // Дозволяємо лише .txt
+            saveFileDialog.Title = "Зберегти звіт розфарбовування";
+            saveFileDialog.FileName = "Graph_Report.txt"; // Назва файлу за замовчуванням
+
+            // 3. Якщо користувач вибрав місце і натиснув "Зберегти"
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                // 4. Формуємо красивий текст для файлу
+                StringBuilder report = new StringBuilder();
+                report.AppendLine("========================================");
+                report.AppendLine("   ЗВІТ: РОЗФАРБОВУВАННЯ ГРАФА");
+                report.AppendLine("========================================");
+                report.AppendLine($"Дата та час: {DateTime.Now}");
+                report.AppendLine($"Загальна кількість вершин: {_graph.Nodes.Count}");
+                report.AppendLine($"Залишкових конфліктів: {_graph.CalculateConflicts()}");
+
+                // Додаємо інформацію з нашої панелі результатів (який алгоритм працював)
+                report.AppendLine("\n--- Останній запущений алгоритм ---");
+                report.AppendLine(ResultTextBlock.Text);
+
+                report.AppendLine("\n--- Деталізація по вершинах ---");
+                for (int i = 0; i < _graph.Nodes.Count; i++)
+                {
+                    var currentNode = _graph.Nodes[i];
+
+                    // Збираємо номери сусідів у список
+                    List<int> neighborIndices = new List<int>();
+                    foreach (var neighbor in currentNode.Neighbors)
+                    {
+                        // Шукаємо індекс сусіда і додаємо 1 (щоб нумерація була з 1, а не з 0)
+                        neighborIndices.Add(_graph.Nodes.IndexOf(neighbor) + 1);
+                    }
+
+                    // Об'єднуємо номери сусідів через кому (або пишемо "немає")
+                    string neighborsText = neighborIndices.Count > 0
+                        ? string.Join(", ", neighborIndices)
+                        : "немає";
+
+                    // Записуємо все в один рядок
+                    report.AppendLine($"Вершина {i + 1}: Колір №{currentNode.Color} | Зв'язки з: [{neighborsText}]");
+                }
+                report.AppendLine("========================================");
+
+                // 5. Фізично записуємо сформований текст у файл на диск
+                try
+                {
+                    File.WriteAllText(saveFileDialog.FileName, report.ToString());
+                    MessageBox.Show("Звіт успішно збережено!", "Успіх", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Виникла помилка при збереженні файлу: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
         // --- Допоміжні методи для малювання ---
         private void DrawEdge(Node a, Node b)
@@ -305,6 +375,26 @@ namespace Graph_Coloring
 
             GraphCanvas.Children.Add(ellipse);
             _nodeVisuals.Add(node, ellipse);
+
+            TextBlock nodeNumber = new TextBlock
+            {
+                Text = (_graph.Nodes.Count - 1).ToString(),// Пишемо номер (кількість вершин на цей момент)
+                Width = 40,                           // Така ж ширина, як у Ellipse
+                Height = 40,                          // Така ж висота, як у Ellipse
+                TextAlignment = TextAlignment.Center, // Центруємо по горизонталі
+                Padding = new Thickness(0, 10, 0, 0), // Опускаємо текст трохи вниз для ідеального центру (10 підходить для 40px)
+                Foreground = Brushes.Black,           // Білий колір тексту
+                FontWeight = FontWeights.Bold,        // Жирний шрифт
+                FontSize = 14,                        // Розмір шрифту
+                IsHitTestVisible = false              // ПРОПУСКАЄ КЛІКИ МИШКИ КРІЗЬ ТЕКСТ В ELLIPSE!
+            };
+
+            // Ставимо ті ж самі координати, що й у Ellipse
+            Canvas.SetLeft(nodeNumber, node.X - 20);
+            Canvas.SetTop(nodeNumber, node.Y - 20);
+
+            // Додаємо текст на Canvas ПІСЛЯ кружечка, щоб він був зверху
+            GraphCanvas.Children.Add(nodeNumber);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Graph_Coloring.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Розфарбовування графів" Height="450" Width="600" WindowStartupLocation="CenterScreen">
+        Title="Розфарбовування графів" Height="550" Width="650" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*"/>
@@ -29,6 +29,8 @@
                            FontWeight="SemiBold" 
                            Foreground="#333333"/>
             </Border>
+
+            <Button Content="💾 Зберегти звіт у файл" Margin="10,20,10,10" Padding="8" Click="BtnSaveFile_Click" Background="#455A64" Foreground="White" FontWeight="Bold"/>
         </StackPanel>
     </Grid>
 </Window>

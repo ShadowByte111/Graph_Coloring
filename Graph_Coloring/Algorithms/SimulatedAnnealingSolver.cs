@@ -22,7 +22,6 @@ namespace Graph_Coloring.Algorithms
                 return 0;
             }
 
-            // 1. Початковий стан: випадкове розфарбування
             foreach (var node in graph.Nodes)
             {
                 node.Color = _random.Next(1, colorCount + 1);
@@ -31,16 +30,14 @@ namespace Graph_Coloring.Algorithms
             int currentConflicts = graph.CalculateConflicts();
             int iterations = 0;
 
-            // Налаштування "відпалу"
-            double temperature = 100.0;     // Початкова температура
-            double coolingRate = 0.99;      // Швидкість охолодження (чим ближче до 1, тим довше шукає)
-            double absoluteTemperature = 0.00001; // Температура зупинки
+            double temperature = 100.0;
+            double coolingRate = 0.99;
+            double absoluteTemperature = 0.00001;
 
             while (temperature > absoluteTemperature && currentConflicts > 0)
             {
                 iterations++;
 
-                // Вибираємо випадкову ноду і новий випадковий колір
                 var randomNode = graph.Nodes[_random.Next(graph.Nodes.Count)];
                 int oldColor = randomNode.Color;
                 int newColor = _random.Next(1, colorCount + 1);
@@ -72,7 +69,6 @@ namespace Graph_Coloring.Algorithms
                     }
                 }
 
-                // Охолоджуємо систему
                 temperature *= coolingRate;
             }
 

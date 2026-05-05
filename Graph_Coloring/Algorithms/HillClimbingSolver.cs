@@ -23,13 +23,12 @@ namespace Graph_Coloring.Algorithms
                     node.Color = 1; 
                 }
 
-                return 0; // 0 ітерацій, бо ми нічого не шукали
+                return 0;
             }
 
             int iterations = 0;
-            int maxIterations = 10000; // Щоб алгоритм не працював вічно
+            int maxIterations = 10000;
 
-            // 1. Початковий стан: фарбуємо все випадково
             foreach (var node in graph.Nodes)
             {
                 node.Color = _random.Next(1, colorCount + 1);
@@ -37,16 +36,13 @@ namespace Graph_Coloring.Algorithms
 
             int currentConflicts = graph.CalculateConflicts();
 
-            // 2. Основний цикл покращення
             while (currentConflicts > 0 && iterations < maxIterations)
             {
                 iterations++;
 
-                // Вибираємо випадкову ноду
                 var randomNode = graph.Nodes[_random.Next(graph.Nodes.Count)];
                 int oldColor = randomNode.Color;
 
-                // Пробуємо змінити її колір на інший випадковий
                 int newColor = _random.Next(1, colorCount + 1);
                 if (newColor == oldColor)
                 {
@@ -56,14 +52,12 @@ namespace Graph_Coloring.Algorithms
                 randomNode.Color = newColor;
                 int newConflicts = graph.CalculateConflicts();
 
-                // Якщо стало краще або так само (для виходу з плато) — залишаємо
                 if (newConflicts <= currentConflicts)
                 {
                     currentConflicts = newConflicts;
                 }
                 else
                 {
-                    // Якщо стало гірше — повертаємо старий колір
                     randomNode.Color = oldColor;
                 }
             }

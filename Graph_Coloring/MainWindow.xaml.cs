@@ -1,7 +1,6 @@
-﻿//using Graph_Coloring.Graph_Coloring;
-using System.IO;          // Для запису тексту у файл
-using System.Text;        // Для красивого форматування тексту (StringBuilder)
-using Microsoft.Win32;    // Для вікна SaveFileDialog
+﻿using System.IO;        
+using System.Text;      
+using Microsoft.Win32;  
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -27,7 +26,6 @@ namespace Graph_Coloring
         private Graph _graph;
         private Dictionary<Node, Ellipse> _nodeVisuals;
 
-        // Змінна для малювання ребер (запам'ятовує перший клік по вершині)
         private Node? _firstNodeSelected = null;
 
         private Brush[] _palette = new Brush[]
@@ -46,9 +44,7 @@ namespace Graph_Coloring
             _nodeVisuals = new Dictionary<Node, Ellipse>();
         }
 
-        // --- МАЛЮВАННЯ ГРАФА МИШКОЮ ---
-
-        // 1. Клік по порожньому полотну створює вершину
+        // МАЛЮВАННЯ ГРАФА МИШКОЮ 
         private void GraphCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (_graph.Nodes.Count >= 20)
@@ -65,20 +61,17 @@ namespace Graph_Coloring
                 double dy = node.Y - clickPosition.Y;
                 double distance = Math.Sqrt(dx * dx + dy * dy);
 
-                // 40 - це діаметр нашого кружечка. Якщо відстань менша, значить вони перетнуться
                 if (distance < 40)
                 {
-                    return; // Просто ігноруємо клік, нічого не малюємо
+                    return;
                 }
             }
 
-            // Додаємо в логіку графа
             _graph.AddNode(clickPosition.X, clickPosition.Y);
-            // Малюємо на екрані (беремо останню додану вершину)
             DrawNode(_graph.Nodes[_graph.Nodes.Count - 1]);
         }
 
-        // --- КНОПКА: Очистити все (переробили кнопку генерації) ---
+        //  КНОПКА 1: Очистити все
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             GraphCanvas.Children.Clear();
@@ -87,7 +80,7 @@ namespace Graph_Coloring
             _firstNodeSelected = null;
         }
 
-        // --- КНОПКА: Запуск алгоритму ---
+        //   КНОПКА 2 : Запуск Hill Clinbing
         private void BtnSolveHill_Click(object sender, RoutedEventArgs e)
         {
             if (_graph.Nodes.Count == 0)
@@ -100,7 +93,6 @@ namespace Graph_Coloring
                 return;
             }
 
-            // Скидаємо кольори перед новим запуском
             _graph.ClearColors();
             foreach (var ellipse in _nodeVisuals.Values)
             {
@@ -108,7 +100,7 @@ namespace Graph_Coloring
             }
 
             ISolver solver = new HillClimbingSolver();
-            // Дамо алгоритму більше кольорів для складних графів
+            
             int steps = solver.Solve(_graph, colorCount);
 
             foreach (var node in _graph.Nodes)
@@ -125,7 +117,7 @@ namespace Graph_Coloring
                 $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-        // --- КНОПКА 3: Запуск Емуляції відпалу ---
+        // КНОПКА 3: Запуск Емуляції відпалу
         private void BtnSolveAnnealing_Click(object sender, RoutedEventArgs e)
         {
             if (_graph.Nodes.Count == 0)
@@ -138,18 +130,16 @@ namespace Graph_Coloring
                 return;
             }
 
-            // Скидаємо кольори перед запуском
             _graph.ClearColors();
             foreach (var ellipse in _nodeVisuals.Values)
             {
                 ellipse.Fill = _palette[0];
             }
 
-            // Використовуємо новий алгоритм!
             ISolver solver = new SimulatedAnnealingSolver();
-            int steps = solver.Solve(_graph, colorCount); // Дамо 3 кольори для цікавості
 
-            // Оновлюємо картинку
+            int steps = solver.Solve(_graph, colorCount);
+
             foreach (var node in _graph.Nodes)
             {
                 if (_nodeVisuals.ContainsKey(node))
@@ -158,14 +148,13 @@ namespace Graph_Coloring
                 }
             }
 
-            //MessageBox.Show($"Емуляція відпалу завершила роботу за {steps} ітерацій!\nЗалишилось конфліктів: {_graph.CalculateConflicts()}", "Результат Відпалу");
             ResultTextBlock.Text =
                 $"Метод: Simulated Annealing\n" +
                 $"Ітерацій: {steps}\n" +
                 $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-        // --- КНОПКА 4: Запуск Променевого пошуку ---
+        // КНОПКА 4: Запуск Променевого пошуку
         private void BtnSolveBeam_Click(object sender, RoutedEventArgs e)
         {
             if (_graph.Nodes.Count == 0)
@@ -178,7 +167,6 @@ namespace Graph_Coloring
                 return;
             }
 
-            // Скидаємо кольори
             _graph.ClearColors();
             foreach (var ellipse in _nodeVisuals.Values)
             {
@@ -186,9 +174,8 @@ namespace Graph_Coloring
             }
 
             ISolver solver = new BeamSearchSolver();
-            int steps = solver.Solve(_graph, colorCount); // Нехай спробує розфарбувати в 3 кольори
+            int steps = solver.Solve(_graph, colorCount);
 
-            // Малюємо результат
             foreach (var node in _graph.Nodes)
             {
                 if (_nodeVisuals.ContainsKey(node))
@@ -205,63 +192,54 @@ namespace Graph_Coloring
 
   
 
-        // --- МЕТОД ВАЛІДАЦІЇ ---
+        // ТЕКСТОВЕ ПОЛЕ: Ввід кількості кольорів
         private bool ValidateColorInput(out int colorCount)
         {
             colorCount = 0;
 
-            // 1. Перевірка: чи намальований граф взагалі
             if (_graph.Nodes.Count == 0)
             {
                 MessageBox.Show("Спочатку намалюйте граф (додайте хоча б одну вершину)!", "Помилка");
                 return false;
             }
 
-            // 2. Перевірка: чи це взагалі ціле число
             if (!int.TryParse(ColorCountInput.Text, out colorCount))
             {
                 MessageBox.Show("Будь ласка, введіть ціле число у поле кількості кольорів!", "Помилка вводу");
                 return false;
             }
 
-            // 3. Перевірка: чи число не менше 1
             if (colorCount < 1)
             {
                 MessageBox.Show("Кількість кольорів має бути не менше 1!", "Помилка вводу");
                 return false;
             }
 
-            // 4. Перевірка: чи кольорів не більше, ніж вершин
             if (colorCount > _graph.Nodes.Count)
             {
                 MessageBox.Show($"Кількість кольорів не може перевищувати кількість вершин!\nМаксимум для цього графа: {_graph.Nodes.Count}", "Помилка вводу");
                 return false;
             }
 
-            // Якщо всі перевірки пройдені успішно
             return true;
         }
 
-        // --- КНОПКА: Збереження результатів у файл ---
+        // КНОПКА 5: Збереження результатів у файл
         private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
         {
-            // 1. Перевіряємо, чи є взагалі що зберігати
             if (_graph.Nodes.Count == 0)
             {
                 MessageBox.Show("Немає графа для збереження. Спочатку намалюйте його!", "Помилка");
                 return;
             }
 
-            // 2. Налаштовуємо стандартне вікно збереження Windows
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "Текстові файли (*.txt)|*.txt|Всі файли (*.*)|*.*"; // Дозволяємо лише .txt
+            saveFileDialog.Filter = "Текстові файли (*.txt)|*.txt|Всі файли (*.*)|*.*"; // лише .txt
             saveFileDialog.Title = "Зберегти звіт розфарбовування";
             saveFileDialog.FileName = "Graph_Report.txt"; // Назва файлу за замовчуванням
 
-            // 3. Якщо користувач вибрав місце і натиснув "Зберегти"
             if (saveFileDialog.ShowDialog() == true)
             {
-                // 4. Формуємо красивий текст для файлу
                 StringBuilder report = new StringBuilder();
                 report.AppendLine("========================================");
                 report.AppendLine("   ЗВІТ: РОЗФАРБОВУВАННЯ ГРАФА");
@@ -270,7 +248,6 @@ namespace Graph_Coloring
                 report.AppendLine($"Загальна кількість вершин: {_graph.Nodes.Count}");
                 report.AppendLine($"Залишкових конфліктів: {_graph.CalculateConflicts()}");
 
-                // Додаємо інформацію з нашої панелі результатів (який алгоритм працював)
                 report.AppendLine("\n--- Останній запущений алгоритм ---");
                 report.AppendLine(ResultTextBlock.Text);
 
@@ -279,25 +256,20 @@ namespace Graph_Coloring
                 {
                     var currentNode = _graph.Nodes[i];
 
-                    // Збираємо номери сусідів у список
                     List<int> neighborIndices = new List<int>();
                     foreach (var neighbor in currentNode.Neighbors)
                     {
-                        // Шукаємо індекс сусіда і додаємо 1 (щоб нумерація була з 1, а не з 0)
                         neighborIndices.Add(_graph.Nodes.IndexOf(neighbor) + 1);
                     }
 
-                    // Об'єднуємо номери сусідів через кому (або пишемо "немає")
                     string neighborsText = neighborIndices.Count > 0
                         ? string.Join(", ", neighborIndices)
                         : "немає";
 
-                    // Записуємо все в один рядок
                     report.AppendLine($"Вершина {i + 1}: Колір №{currentNode.Color} | Зв'язки з: [{neighborsText}]");
                 }
                 report.AppendLine("========================================");
 
-                // 5. Фізично записуємо сформований текст у файл на диск
                 try
                 {
                     File.WriteAllText(saveFileDialog.FileName, report.ToString());
@@ -310,7 +282,7 @@ namespace Graph_Coloring
             }
         }
 
-        // --- Допоміжні методи для малювання ---
+        // Допоміжні методи для малювання 
         private void DrawEdge(Node a, Node b)
         {
             Line line = new Line
@@ -323,7 +295,6 @@ namespace Graph_Coloring
                 StrokeThickness = 3
             };
 
-            // Додаємо лінію на задній план (щоб вона не перекривала кружечки)
             GraphCanvas.Children.Insert(0, line);
         }
 
@@ -341,19 +312,16 @@ namespace Graph_Coloring
             Canvas.SetLeft(ellipse, node.X - 20);
             Canvas.SetTop(ellipse, node.Y - 20);
 
-            // 2. Логіка кліку по САМІЙ ВЕРШИНІ (для з'єднання ребрами)
             ellipse.MouseLeftButtonDown += (s, e) =>
             {
                 if (_firstNodeSelected == null)
                 {
-                    // Це перший клік - виділяємо вершину червоним контуром
                     _firstNodeSelected = node;
                     ellipse.Stroke = Brushes.Red;
                     ellipse.StrokeThickness = 4;
                 }
                 else
                 {
-                    // Це другий клік - з'єднуємо їх, якщо це різні вершини
                     if (_firstNodeSelected != node)
                     {
                         if (!_firstNodeSelected.Neighbors.Contains(node))
@@ -363,13 +331,11 @@ namespace Graph_Coloring
                         }
                     }
 
-                    // Знімаємо виділення з першої вершини
                     _nodeVisuals[_firstNodeSelected].Stroke = Brushes.Black;
                     _nodeVisuals[_firstNodeSelected].StrokeThickness = 2;
                     _firstNodeSelected = null;
                 }
 
-                // Зупиняємо клік, щоб він не пішов далі на Canvas (щоб не створилася нова вершина під цією)
                 e.Handled = true;
             };
 
@@ -378,22 +344,20 @@ namespace Graph_Coloring
 
             TextBlock nodeNumber = new TextBlock
             {
-                Text = (_graph.Nodes.Count - 1).ToString(),// Пишемо номер (кількість вершин на цей момент)
-                Width = 40,                           // Така ж ширина, як у Ellipse
-                Height = 40,                          // Така ж висота, як у Ellipse
-                TextAlignment = TextAlignment.Center, // Центруємо по горизонталі
-                Padding = new Thickness(0, 10, 0, 0), // Опускаємо текст трохи вниз для ідеального центру (10 підходить для 40px)
-                Foreground = Brushes.Black,           // Білий колір тексту
-                FontWeight = FontWeights.Bold,        // Жирний шрифт
-                FontSize = 14,                        // Розмір шрифту
-                IsHitTestVisible = false              // ПРОПУСКАЄ КЛІКИ МИШКИ КРІЗЬ ТЕКСТ В ELLIPSE!
+                Text = (_graph.Nodes.Count - 1).ToString(),
+                Width = 40,                           
+                Height = 40,                          
+                TextAlignment = TextAlignment.Center, 
+                Padding = new Thickness(0, 10, 0, 0), 
+                Foreground = Brushes.Black,           
+                FontWeight = FontWeights.Bold,        
+                FontSize = 14,                        
+                IsHitTestVisible = false
             };
 
-            // Ставимо ті ж самі координати, що й у Ellipse
             Canvas.SetLeft(nodeNumber, node.X - 20);
             Canvas.SetTop(nodeNumber, node.Y - 20);
 
-            // Додаємо текст на Canvas ПІСЛЯ кружечка, щоб він був зверху
             GraphCanvas.Children.Add(nodeNumber);
         }
     }

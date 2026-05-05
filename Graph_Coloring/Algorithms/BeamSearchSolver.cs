@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Graph_Coloring.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Algorithms
 {
     public class BeamSearchSolver : ISolver
     {
@@ -14,7 +15,20 @@ namespace Graph_Coloring
         public int Solve(Graph graph, int colorCount)
         {
             int n = graph.Nodes.Count;
-            if (n == 0) return 0;
+            if (n == 0)
+            {
+                return 0;
+            }
+
+            // 1. ЗАПОБІЖНИК: Якщо колір всього 1, відразу виходимо
+            if (colorCount <= 1)
+            {
+                foreach (var node in graph.Nodes)
+                {
+                    node.Color = 1;
+                }
+                return 0;
+            }
 
             int iterations = 0;
             int maxIterations = 500;

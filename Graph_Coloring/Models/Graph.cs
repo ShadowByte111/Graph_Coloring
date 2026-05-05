@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Models
 {
     public class Graph
     {

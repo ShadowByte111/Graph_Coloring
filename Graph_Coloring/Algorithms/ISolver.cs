@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Graph_Coloring.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Algorithms
 {
     internal interface ISolver
     {

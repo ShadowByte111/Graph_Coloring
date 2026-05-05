@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Graph_Coloring.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Algorithms
 {
     public class SimulatedAnnealingSolver : ISolver
     {
@@ -12,6 +13,15 @@ namespace Graph_Coloring
 
         public int Solve(Graph graph, int colorCount)
         {
+            if (colorCount <= 1)
+            {
+                foreach (var node in graph.Nodes)
+                {
+                    node.Color = 1;
+                }
+                return 0;
+            }
+
             // 1. Початковий стан: випадкове розфарбування
             foreach (var node in graph.Nodes)
             {
@@ -35,35 +45,30 @@ namespace Graph_Coloring
                 int oldColor = randomNode.Color;
                 int newColor = _random.Next(1, colorCount + 1);
 
-                if (newColor == oldColor) continue;
-
-                // Робимо тестовий крок
-                randomNode.Color = newColor;
-                int newConflicts = graph.CalculateConflicts();
-
-                // Різниця між новим станом і старим
-                int deltaE = newConflicts - currentConflicts;
-
-                // Якщо стало краще (deltaE < 0) або так само — ПРИЙМАЄМО 100%
-                if (deltaE <= 0)
+                if (newColor != oldColor)
                 {
-                    currentConflicts = newConflicts;
-                }
-                else
-                {
-                    // Якщо стало гірше — приймаємо з певною ймовірністю, яка залежить від температури
-                    double probability = Math.Exp(-deltaE / temperature);
-                    double randomValue = _random.NextDouble(); // Випадкове число від 0.0 до 1.0
+                    randomNode.Color = newColor;
+                    int newConflicts = graph.CalculateConflicts();
 
-                    if (randomValue < probability)
+                    int deltaE = newConflicts - currentConflicts;
+
+                    if (deltaE <= 0)
                     {
-                        // Ризикуємо і приймаємо гірший крок!
                         currentConflicts = newConflicts;
                     }
                     else
                     {
-                        // Не пощастило, відхиляємо і повертаємо старий колір
-                        randomNode.Color = oldColor;
+                        double probability = Math.Exp(-deltaE / temperature);
+                        double randomValue = _random.NextDouble();
+
+                        if (randomValue < probability)
+                        {
+                            currentConflicts = newConflicts;
+                        }
+                        else
+                        {
+                            randomNode.Color = oldColor;
+                        }
                     }
                 }
 

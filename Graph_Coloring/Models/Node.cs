@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Models
 {
     public class Node : INotifyPropertyChanged
     {

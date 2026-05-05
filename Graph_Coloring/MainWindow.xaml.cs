@@ -10,7 +10,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.Generic;
-
+using Graph_Coloring.Models;
+using Graph_Coloring.Algorithms;
 
 namespace Graph_Coloring
 {
@@ -24,11 +25,15 @@ namespace Graph_Coloring
         private Dictionary<Node, Ellipse> _nodeVisuals;
 
         // Змінна для малювання ребер (запам'ятовує перший клік по вершині)
-        private Node _firstNodeSelected = null;
+        private Node? _firstNodeSelected = null;
 
         private Brush[] _palette = new Brush[]
         {
-            Brushes.White, Brushes.Tomato, Brushes.MediumSeaGreen, Brushes.DodgerBlue, Brushes.Gold, Brushes.BlueViolet, Brushes.Orange
+            Brushes.White, Brushes.Tomato, Brushes.MediumSeaGreen, Brushes.DodgerBlue,
+            Brushes.Gold, Brushes.BlueViolet, Brushes.Orange, Brushes.Orchid,
+            Brushes.Purple, Brushes.PaleTurquoise, Brushes.Olive, Brushes.Aqua,
+            Brushes.BlanchedAlmond, Brushes.Coral, Brushes.DarkBlue, Brushes.ForestGreen,
+            Brushes.Honeydew, Brushes.Yellow, Brushes.Orange, Brushes.OldLace, Brushes.SteelBlue
         };
 
         public MainWindow()
@@ -43,19 +48,54 @@ namespace Graph_Coloring
         // 1. Клік по порожньому полотну створює вершину
         private void GraphCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (_graph.Nodes.Count >= 20)
+            {
+                MessageBox.Show("Досягнуто ліміт: максимум 20 вершин!", "Увага");
+                return;
+            }
+
             Point clickPosition = e.GetPosition(GraphCanvas);
+
+            foreach (var node in _graph.Nodes)
+            {
+                double dx = node.X - clickPosition.X;
+                double dy = node.Y - clickPosition.Y;
+                double distance = Math.Sqrt(dx * dx + dy * dy);
+
+                // 40 - це діаметр нашого кружечка. Якщо відстань менша, значить вони перетнуться
+                if (distance < 40)
+                {
+                    return; // Просто ігноруємо клік, нічого не малюємо
+                }
+            }
 
             // Додаємо в логіку графа
             _graph.AddNode(clickPosition.X, clickPosition.Y);
-
             // Малюємо на екрані (беремо останню додану вершину)
             DrawNode(_graph.Nodes[_graph.Nodes.Count - 1]);
         }
 
-        // --- КНОПКА: Запуск алгоритму ---
-        private void BtnSolve_Click(object sender, RoutedEventArgs e)
+        // --- КНОПКА: Очистити все (переробили кнопку генерації) ---
+        private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0) return;
+            GraphCanvas.Children.Clear();
+            _graph = new Graph();
+            _nodeVisuals.Clear();
+            _firstNodeSelected = null;
+        }
+
+        // --- КНОПКА: Запуск алгоритму ---
+        private void BtnSolveHill_Click(object sender, RoutedEventArgs e)
+        {
+            if (_graph.Nodes.Count == 0)
+            {
+                return;
+            }
+
+            if (!ValidateColorInput(out int colorCount))
+            {
+                return;
+            }
 
             // Скидаємо кольори перед новим запуском
             _graph.ClearColors();
@@ -66,7 +106,7 @@ namespace Graph_Coloring
 
             ISolver solver = new HillClimbingSolver();
             // Дамо алгоритму більше кольорів для складних графів
-            int steps = solver.Solve(_graph, 5);
+            int steps = solver.Solve(_graph, colorCount);
 
             foreach (var node in _graph.Nodes)
             {
@@ -76,13 +116,24 @@ namespace Graph_Coloring
                 }
             }
 
-            MessageBox.Show($"Алгоритм завершив роботу за {steps} ітерацій!\nЗалишилось конфліктів: {_graph.CalculateConflicts()}", "Результат");
+            ResultTextBlock.Text =
+                $"Метод: Hill Climbing\n" +
+                $"Ітерацій: {steps}\n" +
+                $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
         // --- КНОПКА 3: Запуск Емуляції відпалу ---
         private void BtnSolveAnnealing_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0) return;
+            if (_graph.Nodes.Count == 0)
+            {
+                return;
+            }
+
+            if (!ValidateColorInput(out int colorCount))
+            {
+                return;
+            }
 
             // Скидаємо кольори перед запуском
             _graph.ClearColors();
@@ -93,7 +144,7 @@ namespace Graph_Coloring
 
             // Використовуємо новий алгоритм!
             ISolver solver = new SimulatedAnnealingSolver();
-            int steps = solver.Solve(_graph, 3); // Дамо 3 кольори для цікавості
+            int steps = solver.Solve(_graph, colorCount); // Дамо 3 кольори для цікавості
 
             // Оновлюємо картинку
             foreach (var node in _graph.Nodes)
@@ -104,13 +155,25 @@ namespace Graph_Coloring
                 }
             }
 
-            MessageBox.Show($"Емуляція відпалу завершила роботу за {steps} ітерацій!\nЗалишилось конфліктів: {_graph.CalculateConflicts()}", "Результат Відпалу");
+            //MessageBox.Show($"Емуляція відпалу завершила роботу за {steps} ітерацій!\nЗалишилось конфліктів: {_graph.CalculateConflicts()}", "Результат Відпалу");
+            ResultTextBlock.Text =
+                $"Метод: Simulated Annealing\n" +
+                $"Ітерацій: {steps}\n" +
+                $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
         // --- КНОПКА 4: Запуск Променевого пошуку ---
         private void BtnSolveBeam_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0) return;
+            if (_graph.Nodes.Count == 0)
+            {
+                return;
+            }
+
+            if (!ValidateColorInput(out int colorCount))
+            {
+                return;
+            }
 
             // Скидаємо кольори
             _graph.ClearColors();
@@ -120,7 +183,7 @@ namespace Graph_Coloring
             }
 
             ISolver solver = new BeamSearchSolver();
-            int steps = solver.Solve(_graph, 3); // Нехай спробує розфарбувати в 3 кольори
+            int steps = solver.Solve(_graph, colorCount); // Нехай спробує розфарбувати в 3 кольори
 
             // Малюємо результат
             foreach (var node in _graph.Nodes)
@@ -131,16 +194,49 @@ namespace Graph_Coloring
                 }
             }
 
-            MessageBox.Show($"Променевий пошук завершив роботу за {steps} ітерацій!\nЗалишилось конфліктів: {_graph.CalculateConflicts()}", "Результат Променевого пошуку");
+            ResultTextBlock.Text =
+                $"Метод: Beam Search\n" +
+                $"Ітерацій: {steps}\n" +
+                $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-        // --- КНОПКА: Очистити все (переробили кнопку генерації) ---
-        private void BtnClear_Click(object sender, RoutedEventArgs e)
+  
+
+        // --- МЕТОД ВАЛІДАЦІЇ ---
+        private bool ValidateColorInput(out int colorCount)
         {
-            GraphCanvas.Children.Clear();
-            _graph = new Graph();
-            _nodeVisuals.Clear();
-            _firstNodeSelected = null;
+            colorCount = 0;
+
+            // 1. Перевірка: чи намальований граф взагалі
+            if (_graph.Nodes.Count == 0)
+            {
+                MessageBox.Show("Спочатку намалюйте граф (додайте хоча б одну вершину)!", "Помилка");
+                return false;
+            }
+
+            // 2. Перевірка: чи це взагалі ціле число
+            if (!int.TryParse(ColorCountInput.Text, out colorCount))
+            {
+                MessageBox.Show("Будь ласка, введіть ціле число у поле кількості кольорів!", "Помилка вводу");
+                return false;
+            }
+
+            // 3. Перевірка: чи число не менше 1
+            if (colorCount < 1)
+            {
+                MessageBox.Show("Кількість кольорів має бути не менше 1!", "Помилка вводу");
+                return false;
+            }
+
+            // 4. Перевірка: чи кольорів не більше, ніж вершин
+            if (colorCount > _graph.Nodes.Count)
+            {
+                MessageBox.Show($"Кількість кольорів не може перевищувати кількість вершин!\nМаксимум для цього графа: {_graph.Nodes.Count}", "Помилка вводу");
+                return false;
+            }
+
+            // Якщо всі перевірки пройдені успішно
+            return true;
         }
 
 
@@ -190,8 +286,11 @@ namespace Graph_Coloring
                     // Це другий клік - з'єднуємо їх, якщо це різні вершини
                     if (_firstNodeSelected != node)
                     {
-                        _graph.AddEdge(_firstNodeSelected, node);
-                        DrawEdge(_firstNodeSelected, node);
+                        if (!_firstNodeSelected.Neighbors.Contains(node))
+                        {
+                            _graph.AddEdge(_firstNodeSelected, node);
+                            DrawEdge(_firstNodeSelected, node);
+                        }
                     }
 
                     // Знімаємо виділення з першої вершини

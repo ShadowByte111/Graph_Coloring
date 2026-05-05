@@ -14,9 +14,21 @@
             <TextBlock Text="КЕРУВАННЯ" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,15"/>
 
             <Button Content="Очистити граф" Margin="10,5" Padding="5" Click="BtnClear_Click"/>
-            <Button Content="Hill Climbing" Margin="10,5" Padding="5" Click="BtnSolve_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
-            <Button Content="Відпал (Simulated Annealing)" Margin="10,5" Padding="5" Click="BtnSolveAnnealing_Click" Background="#FF9800" Foreground="White" FontWeight="Bold"/>
-            <Button Content="Променевий пошук (Beam Search)" Margin="10,5" Padding="5" Click="BtnSolveBeam_Click" Background="#2196F3" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Hill Climbing" Margin="10,5" Padding="5" Click="BtnSolveHill_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Simulated Annealing" Margin="10,5" Padding="5" Click="BtnSolveAnnealing_Click" Background="#FF9800" Foreground="White" FontWeight="Bold"/>
+            <Button Content="Beam Search" Margin="10,5" Padding="5" Click="BtnSolveBeam_Click" Background="#2196F3" Foreground="White" FontWeight="Bold"/>
+            
+            <TextBlock Text="КІЛЬКІСТЬ КОЛЬОРІВ:" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,5"/>
+            <TextBox x:Name="ColorCountInput" Text="0" Margin="10,0" Padding="5" TextAlignment="Center" FontSize="14" FontWeight="Bold"/>
+            
+            <Border BorderBrush="Gray" BorderThickness="1" Margin="10,20,10,10" Padding="10" Background="White">
+                <TextBlock x:Name="ResultTextBlock" 
+                           Text="Результати з'являться тут..." 
+                           TextWrapping="Wrap" 
+                           FontSize="13" 
+                           FontWeight="SemiBold" 
+                           Foreground="#333333"/>
+            </Border>
         </StackPanel>
     </Grid>
 </Window>

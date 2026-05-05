@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Graph_Coloring.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Graph_Coloring
+namespace Graph_Coloring.Algorithms
 {
     using System;
     using System.Linq;
@@ -15,6 +16,16 @@ namespace Graph_Coloring
 
         public int Solve(Graph graph, int colorCount)
         {
+            if (colorCount == 1)
+            {
+                foreach (var node in graph.Nodes) 
+                { 
+                    node.Color = 1; 
+                }
+
+                return 0; // 0 ітерацій, бо ми нічого не шукали
+            }
+
             int iterations = 0;
             int maxIterations = 10000; // Щоб алгоритм не працював вічно
 
@@ -37,7 +48,10 @@ namespace Graph_Coloring
 
                 // Пробуємо змінити її колір на інший випадковий
                 int newColor = _random.Next(1, colorCount + 1);
-                if (newColor == oldColor) continue;
+                if (newColor == oldColor)
+                {
+                    continue;
+                }
 
                 randomNode.Color = newColor;
                 int newConflicts = graph.CalculateConflicts();

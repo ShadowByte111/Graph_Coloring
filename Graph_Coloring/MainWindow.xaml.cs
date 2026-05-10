@@ -78,16 +78,14 @@ namespace Graph_Coloring
             _graph = new Graph();
             _nodeVisuals.Clear();
             _firstNodeSelected = null;
+
+            ResultTextBlock.Text = "Результати з'являться тут...";
+            ColorCountInput.Text = "0";
         }
 
         //   КНОПКА 2 : Запуск Hill Clinbing
         private void BtnSolveHill_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0)
-            {
-                return;
-            }
-
             if (!ValidateColorInput(out int colorCount))
             {
                 return;
@@ -120,11 +118,6 @@ namespace Graph_Coloring
         // КНОПКА 3: Запуск Емуляції відпалу
         private void BtnSolveAnnealing_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0)
-            {
-                return;
-            }
-
             if (!ValidateColorInput(out int colorCount))
             {
                 return;
@@ -157,11 +150,6 @@ namespace Graph_Coloring
         // КНОПКА 4: Запуск Променевого пошуку
         private void BtnSolveBeam_Click(object sender, RoutedEventArgs e)
         {
-            if (_graph.Nodes.Count == 0)
-            {
-                return;
-            }
-
             if (!ValidateColorInput(out int colorCount))
             {
                 return;

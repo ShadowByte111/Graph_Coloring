@@ -21,7 +21,7 @@ namespace Graph_Coloring.Algorithms
             }
 
             int iterations = 0;
-            int maxIterations = 5000;
+            int maxIterations = 500;
 
             List<int[]> beam = new List<int[]>();
 

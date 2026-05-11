@@ -1,4 +1,9 @@
-﻿using Graph_Coloring.Models;
+﻿// ==========================================================================================
+// Файл: BeamSearchSolver.cs
+// Призначення: Містить реалізацію алгоритму "Локальний променевий пошук" (Local Beam Search).
+// Використовує бібліотеку System.Linq для сортування та маніпуляцій з колекціями станів.
+// ==========================================================================================
+using Graph_Coloring.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,11 +12,24 @@ using System.Threading.Tasks;
 
 namespace Graph_Coloring.Algorithms
 {
+    /// <summary>
+    /// Клас, що реалізує метод "Локальний променевий пошук".
+    /// Досліджує кілька найкращих станів паралельно.
+    /// </summary>
     public class BeamSearchSolver : ISolver
     {
+        // Генератор псевдовипадкових чисел (тип Random)
         private Random _random = new Random();
+
+        // Ширина променя - кількість найперспективніших станів, що зберігаються на кожному кроці (тип int)
         private int _beamWidth = 5;
 
+        /// <summary>
+        /// Метод розв'язання задачі за допомогою променевого пошуку.
+        /// </summary>
+        /// <param name="graph">Екземпляр графа для розфарбовування (тип Graph).</param>
+        /// <param name="colorCount">Кількість доступних кольорів (тип int).</param>
+        /// <returns>Кількість виконаних ітерацій (тип int).</returns>
         public int Solve(Graph graph, int colorCount)
         {
             int n = graph.Nodes.Count;
@@ -77,6 +95,13 @@ namespace Graph_Coloring.Algorithms
             return iterations;
         }
 
+        /// <summary>
+        /// Допоміжний метод для підрахунку конфліктів конкретного абстрактного стану (масиву кольорів).
+        /// Оцінює стан без його застосування до візуального графа.
+        /// </summary>
+        /// <param name="graph">Екземпляр графа для зчитування топології зв'язків (тип Graph).</param>
+        /// <param name="stateColors">Масив цілих чисел, що представляє тестові кольори вершин (тип int[]).</param>
+        /// <returns>Загальна кількість конфліктів у заданому стані (тип int).</returns>
         private int CalculateStateConflicts(Graph graph, int[] stateColors)
         {
             int conflicts = 0;

@@ -1,4 +1,15 @@
-﻿using System.IO;        
+﻿// ==========================================================================================
+// Файл: MainWindow.xaml.cs
+// Призначення: Головне вікно програми. Відповідає за логіку взаємодії користувача з 
+// графічним інтерфейсом (WPF), малювання графа на полотні та виклик алгоритмів розфарбовування.
+// Використовувані бібліотеки:
+// - System.Windows.* : для роботи з елементами керування WPF, подіями миші та візуальними формами.
+// - System.Windows.Shapes : для малювання геометричних фігур (Лінії, Еліпси).
+// - System.Windows.Media : для роботи з пензлями (Brushes) та кольорами.
+// - System.IO, System.Text, Microsoft.Win32 : для форматування тексту та збереження звіту у файл.
+// - Graph_Coloring.Models, Graph_Coloring.Algorithms : власні простори імен для роботи з логікою.
+// ==========================================================================================
+using System.IO;        
 using System.Text;      
 using Microsoft.Win32;  
 using System.Windows;
@@ -20,14 +31,19 @@ namespace Graph_Coloring
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-
     public partial class MainWindow : Window
     {
+        // Поле для зберігання абстрактної математичної моделі графа (тип Graph)
         private Graph _graph;
+
+        // Словник для зв'язування логічної вершини з її візуальним відображенням на формі (тип Dictionary<Node, Ellipse>)
         private Dictionary<Node, Ellipse> _nodeVisuals;
 
+        // Поле для відстеження першої виділеної вершини при створенні ребра (тип Node, може бути null)
         private Node? _firstNodeSelected = null;
 
+        // Масив пензлів, що представляє палітру кольорів для розфарбовування (тип Brush[])
+        // Індекс 0 (Brushes.White) використовується як стан "без кольору"
         private Brush[] _palette = new Brush[]
         {
             Brushes.White, Brushes.Tomato, Brushes.MediumSeaGreen, Brushes.DodgerBlue,
@@ -37,6 +53,9 @@ namespace Graph_Coloring
             Brushes.Honeydew, Brushes.Yellow, Brushes.Orange, Brushes.OldLace, Brushes.SteelBlue
         };
 
+        /// <summary>
+        /// Конструктор головного вікна. Ініціалізує компоненти WPF та внутрішні колекції.
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();
@@ -44,7 +63,11 @@ namespace Graph_Coloring
             _nodeVisuals = new Dictionary<Node, Ellipse>();
         }
 
-        // МАЛЮВАННЯ ГРАФА МИШКОЮ 
+        /// <summary>
+        /// Обробник події натискання лівої кнопки миші по полотну (Canvas) для створення нової вершини.
+        /// </summary>
+        /// <param name="sender">Об'єкт, що викликав подію (тип object).</param>
+        /// <param name="e">Аргументи події миші, що містять координати кліку (тип MouseButtonEventArgs).</param>
         private void GraphCanvas_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (_graph.Nodes.Count >= 20)
@@ -71,7 +94,11 @@ namespace Graph_Coloring
             DrawNode(_graph.Nodes[_graph.Nodes.Count - 1]);
         }
 
-        //  КНОПКА 1: Очистити все
+        /// <summary>
+        /// Обробник події натискання кнопки "Очистити". Скидає граф та очищає інтерфейс.
+        /// </summary>
+        /// <param name="sender">Об'єкт кнопки (тип object).</param>
+        /// <param name="e">Аргументи події маршрутизації (тип RoutedEventArgs).</param>
         private void BtnClear_Click(object sender, RoutedEventArgs e)
         {
             GraphCanvas.Children.Clear();
@@ -83,7 +110,11 @@ namespace Graph_Coloring
             ColorCountInput.Text = "0";
         }
 
-        //   КНОПКА 2 : Запуск Hill Clinbing
+        /// <summary>
+        /// Обробник натискання кнопки для запуску методу "Сходження на гору".
+        /// </summary>
+        /// <param name="sender">Об'єкт кнопки (тип object).</param>
+        /// <param name="e">Аргументи події (тип RoutedEventArgs).</param>
         private void BtnSolveHill_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateColorInput(out int colorCount))
@@ -115,7 +146,11 @@ namespace Graph_Coloring
                 $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-        // КНОПКА 3: Запуск Емуляції відпалу
+        /// <summary>
+        /// Обробник натискання кнопки для запуску методу "Імітація відпалу".
+        /// </summary>
+        /// <param name="sender">Об'єкт кнопки (тип object).</param>
+        /// <param name="e">Аргументи події (тип RoutedEventArgs).</param>  
         private void BtnSolveAnnealing_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateColorInput(out int colorCount))
@@ -147,7 +182,11 @@ namespace Graph_Coloring
                 $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-        // КНОПКА 4: Запуск Променевого пошуку
+        /// <summary>
+        /// Обробник натискання кнопки для запуску методу "Променевий пошук".
+        /// </summary>
+        /// <param name="sender">Об'єкт кнопки (тип object).</param>
+        /// <param name="e">Аргументи події (тип RoutedEventArgs).</param>
         private void BtnSolveBeam_Click(object sender, RoutedEventArgs e)
         {
             if (!ValidateColorInput(out int colorCount))
@@ -178,9 +217,12 @@ namespace Graph_Coloring
                 $"Конфліктів: {_graph.CalculateConflicts()}";
         }
 
-  
 
-        // ТЕКСТОВЕ ПОЛЕ: Ввід кількості кольорів
+        /// <summary>
+        /// Допоміжний метод для перевірки коректності вводу кількості кольорів у текстове поле.
+        /// </summary>
+        /// <param name="colorCount">Вихідний параметр, що повертає зчитану кількість кольорів (тип out int).</param>
+        /// <returns>True, якщо дані валідні; інакше False (тип bool).</returns>
         private bool ValidateColorInput(out int colorCount)
         {
             colorCount = 0;
@@ -212,7 +254,11 @@ namespace Graph_Coloring
             return true;
         }
 
-        // КНОПКА 5: Збереження результатів у файл
+        /// <summary>
+        /// Обробник натискання кнопки "Зберегти результати". Генерує звіт та зберігає його у .txt файл.
+        /// </summary>
+        /// <param name="sender">Об'єкт кнопки (тип object).</param>
+        /// <param name="e">Аргументи події (тип RoutedEventArgs).</param>
         private void BtnSaveFile_Click(object sender, RoutedEventArgs e)
         {
             if (_graph.Nodes.Count == 0)
@@ -269,7 +315,11 @@ namespace Graph_Coloring
             }
         }
 
-        // Допоміжні методи для малювання 
+        /// <summary>
+        /// Допоміжний метод для візуального малювання ребра (лінії) між двома вершинами.
+        /// </summary>
+        /// <param name="a">Перша логічна вершина (тип Node).</param>
+        /// <param name="b">Друга логічна вершина (тип Node).</param> 
         private void DrawEdge(Node a, Node b)
         {
             Line line = new Line
@@ -285,6 +335,10 @@ namespace Graph_Coloring
             GraphCanvas.Children.Insert(0, line);
         }
 
+        /// <summary>
+        /// Допоміжний метод для візуального малювання нової вершини та підписки її на події кліку.
+        /// </summary>
+        /// <param name="node">Логічна модель вершини, яку треба відобразити (тип Node).</param>
         private void DrawNode(Node node)
         {
             Ellipse ellipse = new Ellipse

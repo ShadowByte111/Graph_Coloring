@@ -1,4 +1,9 @@
-﻿using Graph_Coloring.Models;
+﻿// ==========================================================================================
+// Файл: SimulatedAnnealingSolver.cs
+// Призначення: Містить реалізацію метаевристичного алгоритму "Імітація відпалу" (Simulated Annealing).
+// Дозволяє уникати локальних мінімумів за допомогою ймовірнісного прийняття гірших станів.
+// ==========================================================================================
+using Graph_Coloring.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace Graph_Coloring.Algorithms
 {
+    /// <summary>
+    /// Клас, що реалізує стохастичний метод "Імітація відпалу".
+    /// </summary>
     public class SimulatedAnnealingSolver : ISolver
     {
         private Random _random = new Random();

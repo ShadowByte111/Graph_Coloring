@@ -123,6 +123,7 @@ namespace Graph_Coloring
             }
 
             _graph.ClearColors();
+
             foreach (var ellipse in _nodeVisuals.Values)
             {
                 ellipse.Fill = _palette[0];

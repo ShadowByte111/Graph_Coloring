@@ -33,6 +33,7 @@ namespace Graph_Coloring.Algorithms
         public int Solve(Graph graph, int colorCount)
         {
             int n = graph.Nodes.Count;
+
             if (n == 0)
             {
                 return 0;
@@ -50,6 +51,7 @@ namespace Graph_Coloring.Algorithms
                 {
                     state[j] = _random.Next(1, colorCount + 1);
                 }
+
                 beam.Add(state);
             }
 
@@ -64,7 +66,10 @@ namespace Graph_Coloring.Algorithms
                     {
                         for (int c = 1; c <= colorCount; c++)
                         {
-                            if (state[i] == c) continue;
+                            if (state[i] == c)
+                            {
+                                continue;
+                            }
 
                             int[] neighbor = (int[])state.Clone();
                             neighbor[i] = c;

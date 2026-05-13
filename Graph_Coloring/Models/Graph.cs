@@ -67,7 +67,10 @@ namespace Graph_Coloring.Models
 
             foreach (var node in Nodes)
             {
-                if (node.Color == 0) continue;
+                if (node.Color == 0)
+                {
+                    continue;
+                }
 
                 foreach (var neighbor in node.Neighbors)
                 {

@@ -12,8 +12,6 @@ using System.Threading.Tasks;
 
 namespace Graph_Coloring.Algorithms
 {
-    using System;
-    using System.Linq;
 
     /// <summary>
     /// Клас, що реалізує метод локального пошуку "Сходження на гору".
